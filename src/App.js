@@ -1,23 +1,32 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import { useState, useEffect } from "react";
+import SearchBar from "./components/SearchBar";
+import Navbar from "./components/Navbar";
+import CityDetails from "./components/CityDetails";
+import { db } from "./firebase-config";
+import { collection, getDocs } from "firebase/firestore";
 
 function App() {
+  const [cityState, setCityState] = useState({});
+  // eslint-disable-next-line
+  const [cities, setCities] = useState([]);
+  const cityRef = collection(db, "citiesData");
+
+  useEffect(() => {
+    const getCities = async () => {
+      const data = await getDocs(cityRef);
+      setCities(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+    };
+    getCities();
+    // eslint-disable-next-line
+  }, []);
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Navbar />
+      <SearchBar setCityState={setCityState} />
+
+      {/* conditional rendering */}
+      {cityState.city!==undefined && <CityDetails cityState={cityState} />}
     </div>
   );
 }
